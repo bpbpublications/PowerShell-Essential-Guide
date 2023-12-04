@@ -1,2 +1,2 @@
-# The Essential PowerShell Handbook
- The Essential PowerShell Handbook, by BPB Publications
+# PowerShell Essential Guide
+PowerShell Essential Guide, by BPB Publications
