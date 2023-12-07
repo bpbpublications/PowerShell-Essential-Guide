@@ -1,0 +1,406 @@
+#Display all running services.
+
+Get-Service | Where-Object {$_.Status -eq "Running"}
+
+Get-Service "wmi*"
+
+Start-Service -Name Spooler
+
+Get-CimInstance win32_service | Where-Object Name -eq tzautoupdate
+Set-Service tzautoupdate -StartupType manual.
+Start-Service "tzautoupdate"
+
+
+Stop-Service -Name "sysmonlog"
+
+
+Get-Service -DisplayName "Windows Remote Management (WS-Management)" | Stop-Service
+
+Get-ChildItem -Path C:\Windows
+
+Get-ChildItem -Path C:\Windows -File
+
+
+Get-ChildItem -Path C:\Windows\* -Include *.exe
+
+Get-ChildItem -Path C:\temp\* -Exclude *.txt
+
+Restart-Computer -ComputerName Server01, Server02, localhost
+
+New-Item -Path C:\Temp -Name "testfile1.txt" -ItemType "file" -Value "This is a text string."
+
+
+New-Item -Path "c:\" -Name "logfiles" -ItemType "directory"
+
+
+Move-Item -Path C:\test.txt -Destination E:\Temp\tst.txt
+
+
+Move-Item -Path .\*.txt -Destination C:\Temp
+
+Join-Path -Path "C:\Users\Username\Documents" -ChildPath "My Files"
+
+$parentPath = "C:\Users\Username\Documents"
+$childPath = "My Files"
+Join-Path -Path $parentPath -ChildPath $childPath
+
+
+Test-Path -Path "C:\Users\Username\Documents\My Files"
+
+Test-Path $pshome\pwsh.exe -NewerThan "July 13, 2009"
+
+
+function Get-User {
+    param (
+        [string]$Username
+    )
+    Write-Host "Getting information for user $Username."
+}
+
+
+
+function Get-LogEntries {
+    param (
+        [string]$Source = 'Application',
+        [int]$EventId = 0
+    )
+    Get-EventLog -LogName $Source -InstanceId $EventId
+}
+
+
+
+function Get-DiskUsage {
+    [CmdletBinding()]
+    param (
+        [Parameter(Position=0)]
+        [string]$Path = (Get-Location).Path
+    )
+
+    Get-ChildItem -Path $Path -Recurse | Measure-Object -Property Length -Sum | Select-Object @{Name="Path";Expression={$Path}},@{Name="Size";Expression={$_.Sum}}    
+}
+
+
+
+function Stop-ProcessByName {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$true)]
+        [string]$ProcessName,
+
+        [Parameter()]
+        [switch]$Force
+    )
+
+    $processes = Get-Process -Name $ProcessName -ErrorAction SilentlyContinue
+    if ($processes) {
+        if ($Force) {
+            Stop-Process -Id $processes.Id -Force
+        } else {
+            Stop-Process -Id $processes.Id
+        }
+    } else {
+        Write-Error "No processes matching '$ProcessName' were found."
+    }
+}
+
+
+
+
+function Get-ChildItemByExtension {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$true)]
+        [string]$Path,
+
+        [Parameter()]
+        [ValidateSet(".txt",".docx",".xlsx")]
+        [string]$Extension = "*",
+
+        [Parameter()]
+        [switch]$Recurse
+    )
+
+    if ($Recurse) {
+        Get-ChildItem -Path $Path -Recurse -Include $Extension
+    } else {
+        Get-ChildItem -Path $Path -Include $Extension
+    }
+}
+
+
+
+Get-ChildItem -Path $env:windir -Filter *.dll -Recurse
+
+
+PS C:\> Get-ChildItem `
+  -Path "$env:windir" `
+  -Filter *.dll `
+  -Recurse
+To pass multiple arguments to a script, you can splat them:
+$myargs = @{
+  Path = "$env:windir"
+  filter = '*.dll
+  Recurse = $true
+}
+Get-ChildItem @myargs
+
+
+
+<#
+.SYNOPSIS
+This script gets the disk usage of a folder or file.
+
+.DESCRIPTION
+This script calculates the disk usage of a folder or file and displays the results.
+
+.PARAMETER Path
+Specifies the path to the folder or file. Default is the current location.
+
+.EXAMPLE
+Get-DiskUsage -Path "C:\Windows"
+Calculates the disk usage of the C:\Windows folder.
+
+#>
+
+function Get-DiskUsage {
+    [CmdletBinding()]
+    param (
+        [Parameter(Position=0)]
+        [string]$Path = (Get-Location).Path
+    )
+
+    Get-ChildItem -Path $Path -Recurse | Measure-Object -Property Length -Sum | Select-Object @{Name="Path";Expression={$Path}},@{Name="Size";Expression={$_.Sum}}    
+}
+
+
+
+PS C:\Windows\System32>Get-Help Get-WindowsVersion
+
+
+function Get-DiskUsage {
+    <#
+    .SYNOPSIS
+    This function calculates the disk usage of a folder or file and displays the results.
+
+    .DESCRIPTION
+    This function calculates the disk usage of a folder or file and displays the results.
+
+    .PARAMETER Path
+    Specifies the path to the folder or file. Default is the current location.
+
+    .EXAMPLE
+    Get-DiskUsage -Path "C:\Windows"
+    Calculates the disk usage of the C:\Windows folder.
+
+    .EXAMPLE
+    Get-DiskUsage
+    Calculates the disk usage of the current location.
+    #>
+
+    [CmdletBinding()]
+    param (
+        [Parameter(Position=0)]
+        [string]$Path = (Get-Location).Path
+    )
+
+    Get-ChildItem -Path $Path -Recurse | Measure-Object -Property Length -Sum | Select-Object @{Name="Path";Expression={$Path}},@{Name="Size";Expression={$_.Sum}}    
+}
+
+
+
+PS C:\Windows\System32>Get-Help Get-DiskUsage
+
+
+
+1.	function Get-Numbers($start, $end) {
+2.	        If($end -gt 10){
+3.	            Write-Debug "Invalid Input.End Value is greater than 10"
+4.	            } else{
+5.	     Write-Debug "Getting numbers between $start and $end"
+6.	     $numbers = $start..$end
+7.	     return $numbers
+8.	}
+9.	 }
+10.	 
+11.	    $nums = Get-Numbers 1 5
+12.	    Write-Host "Numbers: $($nums -join ', ')"
+
+
+
+
+Set-PSBreakpoint -Script .\GetNumbers.ps1 -line 2
+
+
+Get-PSBreakpoint | Remove-PSBreakpoint
+
+Set-PSBreakpoint -Script .\GetNumbers.ps1 -Variable start -Action {if ($start -lt 5){break}}
+
+1.	try {
+2.	    # Some code that might produce an error
+3.	}
+4.	catch {
+5.	    # Code to handle the error
+6.	}
+7.	finally {
+8.	    # Code that will always run, regardless of whether there was an error or not
+9.	}
+
+1.	try {
+2.	    # Code that might produce an error
+3.	    Get-Content -Path 'C:\Nonexistent\File.txt' -ErrorAction Stop
+4.	}
+5.	catch {
+6.	    # Code to handle the error
+7.	    Write-Error -Message "Error: $($_.Exception.Message)"
+8.	}
+9.	finally {
+10.	    # Code that will always run, regardless of whether there was an error or not
+11.	    Write-Output "Cleaning up resources..."
+12.	}
+
+
+1.	try {
+2.	    # Code that might produce an error
+3.	    Get-Content -Path 'C:\Nonexistent\File.txt' -ErrorAction Stop -ErrorVariable err
+4.	}
+5.	catch {
+6.	    # Code to handle the error
+7.	    Write-Error -Message "Error: $($err.Exception.Message)"
+8.	}
+9.	finally {
+10.	    # Code that will always run, regardless of whether there was an error or not
+11.	    Write-Output "Cleaning up resources..."
+12.	}
+
+
+
+1.	trap {
+2.	    Write-Error -Message "Error: $($_.Exception.Message)"
+3.	}
+4.	# Code that might produce an error
+5.	Get-Content -Path 'C:\Nonexistent\File.txt'
+
+
+1.	trap {
+2.	    Write-Error -Message "Error: $($_.Exception.Message)"
+3.	} -ErrorAction Continue
+4.	# Code that might produce a non-terminating error
+5.	Get-ChildItem 'C:\Nonexistent\Folder'
+
+
+# Define an array of computer names to process
+2.	$computers = @('Computer1', 'Computer2', 'Computer3', 'Computer4')
+3.	
+4.	# Start a job for each computer to run a time-consuming task
+5.	foreach ($computer in $computers) {
+6.	    Start-Job -Name "Task-$computer" -ScriptBlock {
+7.	        # Simulate a time-consuming task
+8.	        Start-Sleep -Seconds 10
+9.	        Write-Host "Task completed on $env:COMPUTERNAME"
+10.	    }
+11.	}
+12.	
+13.	# Monitor the progress of each job
+14.	do {
+15.	    # Get the status of all jobs
+16.	    $jobs = Get-Job
+17.	
+18.	    # Loop through each job
+19.	    foreach ($job in $jobs) {
+20.	        # If the job is still running, display its status
+21.	        if ($job.State -eq 'Running') {
+22.	            Write-Host "Job $($job.Name) is $($job.State)"
+23.	        }
+24.	        # If the job is completed, display its output and remove it from the list of jobs
+25.	        elseif ($job.State -eq 'Completed') {
+26.	            Write-Host "Job $($job.Name) is $($job.State)"
+27.	            Receive-Job $job.Id
+28.	            Remove-Job $job.Id
+29.	        }
+30.	    }
+31.	
+32.	    # Wait for 1 second before checking the job status again
+33.	    Start-Sleep -Seconds 1
+34.	}
+35.	while ($jobs.State -contains 'Running')
+
+
+
+1.	Invoke-Command -ComputerName "RemoteComputer1", "RemoteComputer2", "RemoteComputer3" -FilePath "C:\Scripts\Install-Software.ps1"
+
+
+1.	$Username = "Administrator"
+2.	$Password = ConvertTo-SecureString "P@ssw0rd" -AsPlainText -Force
+3.	$Credential = New-Object System.Management.Automation.PSCredential($Username, $Password)
+4.	
+5.	Invoke-Command -ComputerName "RemoteComputer" -Credential $Credential -FilePath "C:\Scripts\Restart-Service.ps1"
+
+
+1.	Invoke-Command -ComputerName "RemoteComputer1", "RemoteComputer2", "RemoteComputer3" -ScriptBlock { Get-Service -Name "ServiceName" } -AsJob
+
+
+1.	$Session = New-PSSession -ComputerName "RemoteComputer" -Credential $Credential -SessionOption (New-PSSessionOption -IdleTimeout 3600000)
+2.	
+3.	Invoke-Command -Session $Session -ScriptBlock { Start-Process -FilePath "C:\Scripts\LongRunningCommand.exe" -Wait }
+
+
+1.	$Computers = "RemoteComputer1", "RemoteComputer2", "RemoteComputer3"
+2.	
+3.	$Sessions = New-PSSession -ComputerName $Computers -Credential $Credential
+4.	
+5.	Copy-Item -Path "C:\Files\File.txt" -Destination "C:\Temp" -ToSession $Sessions
+
+
+
+
+1.	$Computers = "RemoteComputer1", "RemoteComputer2", "RemoteComputer3"
+2.	
+3.	$Computers | ForEach-Object {
+4.	    Get-EventLog -LogName "System" -Newest 100 -ComputerName $_
+5.	}
+
+
+
+1.	$Computers = "RemoteComputer1", "RemoteComputer2", "RemoteComputer3"
+2.	
+3.	Invoke-Command -ComputerName $Computers -ScriptBlock {
+4.	    Set-Service -Name "Spooler" -Status Running
+5.	}
+
+
+1.	$Computers = "RemoteComputer1", "RemoteComputer2", "RemoteComputer3"
+2.	
+3.	Invoke-Command -ComputerName $Computers -ScriptBlock {
+4.	    param($Status)
+5.	    Set-Service -Name "Spooler" -Status $Status
+6.	} -ArgumentList "Stopped"
+
+
+
+1.	Get-CimInstance -ClassName Win32_Processor 
+
+1.	Get-CimClass
+
+1.	Get-CimSession -ComputerName ComputerName
+
+
+1.	Invoke-CimMethod -Query 'select * from Win32_Process where name like "notepad%"' -MethodName "Terminate"
+
+
+1.	Set-CimInstance -Query 'Select * from Win32_Environment where name LIKE "testvar%"' -Property @{VariableValue="abcd"}
+
+
+
+1.	notepad.exe
+2.	$var = Get-CimInstance -Query 'Select * from Win32_Process where name LIKE "notepad%"'
+3.	Remove-CimInstance -InputObject $var
+
+
+
+1.	Register-CimIndicationEvent -ClassName 'Win32_ProcessStartTrace' -SourceIdentifier "ProcessStarted"
+2.	Get-Event -SourceIdentifier "ProcessStarted"
+
+
+
+
+

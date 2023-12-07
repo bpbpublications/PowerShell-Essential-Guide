@@ -1,0 +1,177 @@
+﻿# Example 1: create a new Active Directory user with the specified user details
+# Set the user details
+$firstName = "Prashanth"
+$lastName = "Jayaram"
+$username = "prashanthj"
+$password = "P@ssw0rd123!@#$"
+# Specify the desired OU (Organizational Unit) where the user will be created
+$ou = "OU=bpb,OU=Users,OU=pub,DC=dr"
+
+# Create the user
+New-ADUser -SamAccountName $username `
+           -GivenName $firstName `
+           -Surname $lastName `
+           -UserPrincipalName "prashantj@bpb.pub.in" `
+           -Name "$firstName $lastName" `
+           -Enabled $true `
+           -AccountPassword (ConvertTo-SecureString -String $password -AsPlainText -Force) `
+           -ChangePasswordAtLogon $true `
+           -Path $ou
+
+#Example 2: Adding user from CSV file
+
+# CSV file Content
+FirstName;Initials;Lastname;Username;Email;StreetAddress;City;ZipCode;State;Country;Department;Password;Telephone;JobTitle;Company;OU
+Prashanth;J;Jayaram;jayaramp;jayaramp@mail.com;72 Alto St;Paris;BX5 WXA;Paris;France;Sales;P@ssw0rd123!@#$;1122334455;Sales Agent;AutoTechX;OU=pub,OU=Users,OU=editor,DC=dr,DC=pbp,DC=io
+Rajendra;G;Gupta;guptar;guptar@mail.com;UnderSea 16th Av;Texas;77500;United States;France;Sales;P@ssw0rd123!@#$;5544332211;DevOps;AutoTechX;OU=pub,OU=Users,OU=editor,DC=dr,DC=pbp,DC=io
+
+# the code that adds users from a CSV file:
+
+# Loads the data from the CSV file in a variable
+$UsersList = Import-Csv C:\Users\pjayaram\Documents\input.csv -Delimiter ";"
+$UsersList
+
+# Define User Principal Name
+$UPN = "dr.pbp.io"
+
+# Loop through each CSV row
+foreach ($User in $UsersList) {
+    # Retrieve user data from each CSV column
+    $firstname = $User.FirstName
+    $initials = $User.Initials
+    $lastname = $User.Lastname
+    $username = $User.Username
+    $email = $User.Email
+    $streetaddress = $User.StreetAddress
+    $city = $User.City
+    $zipcode = $User.ZipCode
+    $state = $User.State
+    $country = $User.Country
+    $department = $User.Department
+    $password = $User.Password
+    $telephone = $User.Telephone
+    $jobtitle = $User.JobTitle
+    $company = $User.Company
+    $OU = $User.OU
+
+    # If the user exists, else create the user. In both cases, print a message
+    if (Get-ADUser -Filter { SamAccountName -eq $username }) {
+        Write-Warning "The user with the name $username already exists in AD."
+    } else {
+        New-ADUser `
+            -SamAccountName $username `
+            -UserPrincipalName "$username@$UPN" `
+            -Name "$firstname $lastname" `
+            -GivenName $firstname `
+            -Surname $lastname `
+            -Initials $initials `
+            -Enabled $True `
+            -DisplayName "$lastname, $firstname" `
+            -StreetAddress $streetaddress `
+            -City $city `
+            -PostalCode $zipcode `
+            -State $state `
+            -Country $country `
+            -Company $company `
+            -Department $department `
+            -EmailAddress $email `
+            -OfficePhone $telephone `
+            -Title $jobtitle `
+            -AccountPassword (ConvertTo-SecureString $password -AsPlainText -Force) `
+            -ChangePasswordAtLogon $True `
+            -Path $OU
+
+        Write-Host "The user $username was created successfully." -ForegroundColor Green.
+    }
+}
+
+Read-Host -Prompt "Press any key to exit."
+
+# Example 3: Enaling AD accounts
+
+Import-Module ActiveDirectory
+
+# Specify the username or SamAccountName of the user
+$username = "Rajendra"
+# Enable the user account
+Enable-ADAccount -Identity $username
+
+# OR
+
+Get-ADUser -Filter {name -like "*Rajendra*"} | Enable-ADAccount
+ is used to find Active Directory user accounts containing "Rajendra" and enable those accounts.
+
+
+ #Example 4: Disabling users from a CSV file
+
+ Import-Module ActiveDirectory
+
+# Specify the path to the CSV file
+$csvFilePath = "C:\Users\pjayaram\Documents\user.csv"
+
+# Import the CSV file
+$usersList = Import-Csv -Path $csvFilePath
+
+# Loop through each user and disable the account
+foreach ($user in $usersList) {
+    $username = $user.Username
+    Disable-ADAccount -Identity $username
+}
+
+# Retrieving computer objects from AD
+
+Import-Module ActiveDirectory
+
+# Retrieve all computer objects from Active Directory
+$computers = Get-ADComputer -Filter * -property *
+
+# Array to store computer information
+$computerArray = @()
+
+# Loop through each computer and store relevant information in the array
+foreach ($computer in $computers) {
+    $computerInfo = [PSCustomObject]@{
+        Name = $computer.Name
+        SamAccountName = $computer.SamAccountName
+        DistinguishedName = $computer.DistinguishedName
+        Enabled = $computer.Enabled
+        OperatingSystem = $computer.OperatingSystem
+        OperatingSystemVersion = $computer.OperatingSystemVersion
+        # Add additional properties as needed
+    }
+
+    $computerArray += $computerInfo
+}
+
+# Print the output in a formatted way
+$computerArray | Format-Table -AutoSize
+ 
+# Example 5: Listing service account in Specific group
+Import-Module ActiveDirectory
+
+# Specify the service account naming convention or other criteria
+$serviceAccountPrefix = "svc"
+
+# Specify the group that service accounts belong to
+$serviceAccountGroup = "users"
+
+# Retrieve service accounts from Active Directory based on the filter
+$serviceAccounts = Get-ADUser -Filter "SamAccountName -like '$serviceAccountPrefix*' -or MemberOf -eq '$serviceAccountGroup'"
+
+# Array to store service account information
+$serviceAccountArray = @()
+
+# Loop through each service account and store relevant information in the array
+foreach ($serviceAccount in $serviceAccounts) {
+    $serviceAccountInfo = [PSCustomObject]@{
+        Name = $serviceAccount.Name
+        SamAccountName = $serviceAccount.SamAccountName
+        DistinguishedName = $serviceAccount.DistinguishedName
+        # ... and other properties
+    }
+
+    $serviceAccountArray += $serviceAccountInfo
+}
+
+# Print the output in a formatted way
+$serviceAccountArray | Format-Table -AutoSize

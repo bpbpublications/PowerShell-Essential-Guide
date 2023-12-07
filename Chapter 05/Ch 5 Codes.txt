@@ -1,0 +1,192 @@
+#PowerShell Module vs. Script/Function
+$files = Get-ChildItem C:\Users\pjayaram\Documents -Recurse -File
+foreach ($file in $files) {
+    $content = Get-Content $file.FullName
+    $lineCount = ($content | Measure-Object -Line).Lines
+    Write-Output "$file.FullName contains $lineCount lines"
+}
+
+--------------------------------
+PowerShell function:
+function Get-ProcessInfo {
+    param (
+        [string]$ProcessName
+    )
+    Get-Process -Name $ProcessName | Select-Object Name, CPU, WorkingSet
+}
+------------------------------------------------
+
+PowerShell module:
+# MyModule.psm1 file
+function Get-MyModuleInfo {
+    Write-Output "This is my custom PowerShell module."
+}
+
+Export-ModuleMember -Function Get-MyModuleInfo
+
+# MyModule.psd1 file
+@{
+    ModuleVersion = '1.0.0'
+    CompatiblePSEditions = 'Desktop'
+    Author = 'Prashanth and Rajendra'
+    Description = 'A custom PowerShell module.'
+    FunctionsToExport = 'Get-MyModuleInfo'
+}
+
+------------------------------------------------
+Update-Module -Name MyModule
+------------------------------------------------
+Writing script modules 
+
+# MyModule.psd1
+#
+# Module manifest for MyModule
+
+@{
+    RootModule = 'MyModule.psm1'
+    ModuleVersion = '1.0'
+    Author = 'Your Name'
+    Description = 'A sample PowerShell module'
+    PowerShellVersion = '5.1'
+    FunctionsToExport = 'Get-StringLength'
+}
+
+
+# MyModule.psm1
+#
+# Main script file for MyModule
+
+function Get-StringLength {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string] $InputString
+    )
+
+    return $InputString.Length
+}
+
+Import-Module C:\Path\To\MyModule\MyModule.psd1
+
+
+PS C:\> Get-StringLength "Hello, world!"
+
+-------------------------------------------
+
+Writing binary modules
+
+$code = @'
+using System;
+using System.Management.Automation;
+
+namespace CustomCmdlet
+{
+    [Cmdlet(VerbsCommon.Get, "Greeting")]
+    public class GetGreetingCmdlet : Cmdlet
+    {
+        private string _Name;
+
+        [Parameter(Position = 0, Mandatory = true)]
+        public string Name
+        {
+            get { return _Name; }
+            set { _Name = value; }
+        }
+
+        protected override void ProcessRecord()
+        {
+            WriteObject("Hello, " + Name + "!");
+        }
+    }
+}
+'@
+
+# compile C# code to DLL
+# use a timestamp to create unique file names
+# while testing, when a DLL was imported before, it is in use until PowerShell closes
+# so, to do repeated tests, use different DLL file names
+$datetime = Get-Date -Format yyyyMMddHHmmssffff
+$DLLPath = "$env:temp\myBinaryCmdlet_$datetime.dll"
+Add-Type -TypeDefinition $code -OutputAssembly $DLLPath
+
+# import a module
+Import-Module -Name $DLLPath -Verbose
+
+
+PS C:\WINDOWS\system32> Get-Greeting -Name Prashanth
+Hello, Prashanth!
+
+
+-----------------------------------------------
+Writing dynamic module
+
+$scriptBlock = {
+    function Get-DiskSpace {
+        param (
+            [string[]]$Server
+        )
+        Get-WmiObject -Class win32_volume -ComputerName $Server | Select-Object @{
+            LABEL='Computer';
+            EXPRESSION={$Server}
+        }, driveletter, label, @{
+            LABEL='GBfreespace';
+            EXPRESSION={"{0:N2}" -f ($_.freespace/1GB)}
+        }
+    }
+
+    function Get-Uptime {
+        param (
+            [string[]]$Server
+        )
+        $os = Get-WmiObject win32_operatingsystem -ComputerName $Server
+        $uptime = (Get-Date) - ($os.ConvertToDateTime($os.lastbootuptime))
+        $Display = "Uptime: " + $Uptime.Days + " days, " + $Uptime.Hours + " hours, " + $Uptime.Minutes + " minutes"
+        return $Display
+    }
+}
+
+$moduleName = 'dynamic'
+
+$module = New-Module -ScriptBlock $scriptBlock -Name $moduleName -ModuleType ScriptModule -AsCustomObject
+
+$module.'Get-DiskSpace'("localhost")
+
+$module.'Get-Uptime'("LocalHost")
+
+---------------------------------------------------
+
+Install PowerShell modules in offline mode
+
+Save-Module -Name <ModuleName>   -Path <PathToDownloadDirectory>
+
+Save-Module -Name "SqlServer" -Path "C:\PowerShellModules" 
+
+$env:PSModulePath -split ';' 
+
+Import-Module -Name Module Name
+
+Import-Module -Name SqlServer 
+
+Get-Module -ListAvailable SqlServer
+
+Get-command -Module SqlServer
+
+--------------------------------------------------------------
+Importing a custom PowerShell module into remote session
+
+Enter-PSSession -ComputerName RemoteComputerName
+
+Import-Module MyModule
+
+Invoke-Command -ComputerName RemoteComputerName -ScriptBlock {
+    Import-Module MyModule
+    Get-MyModuleCommand
+}
+
+------------------------------------------------------------
+Handling command name conflicts
+
+Import-Module C:\Users\pjayaram\Desktop\Module1.psd1 -Prefix MySP
+
+
+

@@ -1,0 +1,147 @@
+﻿# EXample 1: Azure ARM templates - Storage creation example
+
+# Set variables
+$resourceGroupName = "your-resource-group-name"
+$deploymentName = "your-deployment-name"
+$location = "your-location"
+$templateFilePath = "path-to-your-arm-template-file.json"
+
+# Authenticate to Azure
+Connect-AzAccount
+
+	# Select the Azure subscription
+	Set-AzContext -SubscriptionId "your-subscription-id"
+	
+	# Create or update the resource group
+	New-AzResourceGroup -Name $resourceGroupName -Location $location
+	
+	# Deploy the ARM template
+	New-AzResourceGroupDeployment -Name $deploymentName -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath
+
+# Example 2: Provisioning Virtual Machines
+
+# 1.	Connect to your Azure account by running the following command:
+
+Connect-AzAccount
+
+# 2.	Create a resource group to hold your VM:
+$resourceGroupName = "rg-prashanth"
+$location = "southeastasia"
+New-AzResourceGroup -Name $resourceGroupName -Location $location
+
+# 3.	Create admin credentials for the VM:
+$cred = Get-Credential -Message "Enter a username and password for the virtual machine."
+
+# 4.	Create the virtual machine:
+
+$vmParams = @{
+  ResourceGroupName = 'myARMDemoRG'
+  Name = 'MyDemoVM'
+  Location = 'eastus'
+  ImageName = 'Win2016Datacenter'
+  PublicIpAddressName = 'MyDemoPublicIp'
+  Credential = $cred
+  OpenPorts = 3389
+  Size = 'Standard_D2s_v3'
+}
+$Vm = New-AzVM @vmParams
+
+
+# 5.	View the VM information:
+$Vm.OSProfile | Select-Object -Property ComputerName, AdminUserName
+
+$Vm | Get-AzNetworkInterface | Select-Object -ExpandProperty IpConfigurations | Select-Object -Property Name, PrivateIpAddress
+
+#6.	Obtain the public IP address of the VM:
+$publicIp = Get-AzPublicIpAddress -Name MyDemoPublicIp -ResourceGroupName 'rg-prashanth'
+
+$publicIp | Select-Object -Property Name, IpAddress, @{label='FQDN'; expression={$_.DnsSettings.Fqdn}}
+
+#7.	Connect to the VM using Remote Desktop:
+mstsc.exe /v $publicIp.IpAddress
+
+
+# Example 3: Monitoring and Analytics using Get-AzMetrics
+
+# Connect to your Azure account
+Connect-AzAccount 
+
+# Set the subscription
+Set-AzContext -SubscriptionId <"subscriptionID">
+
+$subscriptionID="1234we-ertb-23dc-sdfsdfsdfdf345" #"SubscriptinID"
+# Set the parameters
+$resourceGroupName = "rg_dbsql_01" #"<resource-group-name>"
+$vmName = "mydemo1cp02" #"<virtual-machine-name>"
+$metricName = "Percentage CPU"
+$startTime = (Get-Date).AddHours(-1)  # Start time is 1 hour ago
+$endTime = Get-Date  # End time is the current time
+# Construct the resource ID
+$resourceId = "/subscriptions/$subscriptionID/resourceGroups/$resourceGroupName/providers/Microsoft.Compute/virtualMachines/$vmName"
+
+# Retrieve the metrics for the virtual machine
+$metrics = Get-AzMetric -ResourceId $resourceId -MetricNames $metricName -StartTime $startTime -EndTime $endTime
+
+# Process and display the metric data
+foreach ($metric in $metrics) {
+    $metricName = $metric.Name.Value
+    $metricValues = $metric.Timeseries[0].Data
+    Write-Host "Metric Name: $metricName"
+    foreach ($value in $metricValues) {
+        $timestamp = $value.TimeStamp
+        $average = $value.Average
+        Write-Host "Timestamp: $timestamp, Average CPU Percentage: $average"
+    }
+}
+
+
+#Example 4:Listing Azure Virtual Machine Details
+# Connect to your Azure account
+Connect-AzAccount 
+
+# Set the subscription
+Set-AzContext -SubscriptionId <"subscriptionID">
+
+$AzureVM = @()
+
+$vms=Get-AzVM |Select-Object -First 5
+
+Write "Total $($vms.Count)"
+$total = $vms.Count
+$count = 1
+
+ForEach($azVM in $vms)  { 
+        $vmSize=(Get-AzVM -Name $azVM.Name).HardwareProfile.VmSize
+        $VmOS=Get-AzVM -Name  $azVM.Name -ResourceGroupName $azVM.ResourceGroupName -Status
+        $tags = (Get-AzResource -Name $azVM.Name).Tags
+           
+        $props = @{
+            VMName = $azVM.Name
+            Region = $azVM.Location
+            OsType = $azVM.StorageProfile.OsDisk.OsType
+            ResourceGroupName = $azVM.ResourceGroupName
+            VMSize = $vmSize
+            OsName=$VmOS.OsName
+            OsVersion=$VmOS.OsVersion
+            CPUCore = (Get-AzVMSize -Location $azVM.Location| Where-Object { $_.name -eq $VMSize }).NumberOfCores
+            OSVer = $azVM.StorageProfile.ImageReference.Offer + " $($azVM.StorageProfile.ImageReference.Sku)" 
+            CreateDate=$vmCreationTime
+        }
+        if (!$azVM.LicenseType) {
+            $props += @{
+                LicenseType = "No_License"
+            }
+        }
+        else {
+            $props += @{
+                LicenseType = $azVM.LicenseType
+            }
+        }
+    $ServiceObject = New-Object -TypeName PSObject -Property $props
+    $AzureVM += $ServiceObject 
+    
+    Write "Processing VM ($count/$total): ""$($azVM.Name)"""
+    $count++
+   }
+
+$AzureVM |select VMName, VMSize, ResourceGroupName, OsName,OsVersion,Region, CPUCore, LicenseType, OSType,CreateDate| Format-Table -AutoSize

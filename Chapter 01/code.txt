@@ -1,0 +1,42 @@
+[System.Math]::PI -  PI is a property and returns the value of Pi
+[System.Math]::Sqrt(4) - sqrt is the method and returns the square root of 4
+[System.Math]::Pow(3,2) - Pow is a method that returns the value of 3 to the power of 2.
+
+
+$PSVersionTable.PSVersion 
+
+iex "& { $(irm https://aka.ms/install-powershell.ps1) } -UseMSI"
+
+https://packages.microsoft.com/config/ubuntu/<version>/packages-microsoft-prod.deb
+
+sudo dpkg -i packages-microsoft-prod.deb
+
+sudo apt-get update
+
+sudo apt-get install -y powershell
+
+pwsh
+
+
+lsb_release -a
+
+
+wget -q https://packages.microsoft.com/config/debian/<version>/packages-microsoft-prod.deb
+
+sudo dpkg -i packages-microsoft-prod.deb
+
+sudo apt-get update
+
+sudo apt-get install -y powershell
+
+pwsh
+
+cat /etc/redhat-release
+
+sudo rpm -Uvh https://packages.microsoft.com/config/centos/<version>/prod.repo
+
+sudo yum install powershell
+
+pwsh
+
+

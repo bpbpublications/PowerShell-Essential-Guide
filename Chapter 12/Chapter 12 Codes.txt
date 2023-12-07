@@ -1,0 +1,257 @@
+
+Install-Module -Name SqlServer
+
+
+$SQLServerInstance='localhost'
+[System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO')  | out-null
+$Server = new-object ('Microsoft.SqlServer.Management.Smo.Server') $SQLServerInstance
+ $server | Select DatabaseEngineEdition, ServerVersion, Collation
+
+
+$SQLServerInstance='localhost'
+[System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO')  | out-null
+$Server = new-object ('Microsoft.SqlServer.Management.Smo.Server') $SQLServerInstance
+$db = $server.Databases[$dbname]
+$ds = $db.ExecuteWithResults("SELECT Top 3 firstname, lastname FROM Person.Person")
+$dt = $ds.Tables[0]
+$dt
+
+
+
+$ServerInstance = "localhost"
+$Database = "AdventureWorks2019"
+$ConnectionTimeout = 30
+$Query = "SELECT Top 3 FirstName, LastName FROM Person.Person"
+$conn = new-object System.Data.SqlClient.SQLConnection
+$ConnectionString = "Server={0};Database={1};Integrated Security=True;Connect Timeout={2}" -f $ServerInstance, $Database, $ConnectionTimeout
+$conn.ConnectionString = $ConnectionString
+$conn.Open()
+$cmd = New-Object system.Data.SqlClient.SqlCommand($Query, $conn)
+$ds = New-Object System.Data.DataSet
+$da = New-Object System.Data.SqlClient.SqlDataAdapter($cmd)
+[void]$da.Fill($ds)
+$conn.Close()
+ $ds.Tables[0]
+
+
+
+# Define a JSON string
+$json = @"
+{
+  "name": "Alice",
+  "age": 25,
+  "address": {
+    "street": "123 Main St",
+    "city": "San Francisco",
+    "state": "CA",
+    "zip": "94111"
+  },
+  "phones": [
+    {
+      "type": "home",
+      "number": "555-1234"
+    },
+    {
+      "type": "work",
+      "number": "555-5678"
+    }
+  ]
+}
+"@
+
+# Convert the JSON string to a PowerShell object
+$object = ConvertFrom-Json $json
+
+# Output properties of the object
+Write-Output "Name: $($object.name)"
+Write-Output "Age: $($object.age)"
+Write-Output "Street: $($object.address.street)"
+Write-Output "City: $($object.address.city)"
+Write-Output "State: $($object.address.state)"
+Write-Output "Zip: $($object.address.zip)"
+Write-Output "Home Phone: $($object.phones[0].number)"
+Write-Output "Work Phone: $($object.phones[1].number)"
+
+
+
+
+$Path = 'C:\temp\SampleXML.xml'
+$XPath = "/EmpDetails/Person"
+Select-Xml -Path $Path -XPath $Xpath | Select-Object -ExpandProperty Node
+
+
+
+$filePath = 'C:\Temp\file.xml'
+$xmlData = Get-Service | Select-Object Name, DisplayName, Status, StartType -First 2 | ConvertTo-XML -NoTypeInformation
+$xmlData.Save($filePath)
+Get-Content $filePath
+
+
+
+$services=Get-Service
+foreach($service in $services)
+{
+$ser=$service.Status
+$name=$service.name
+$disname=$service.DisplayName
+
+$insertquery="
+INSERT INTO [dbo].[ServiceStatus]
+           ([ServiceDisplayName]
+           ,[ServiceName]
+           ,[Status])
+     VALUES
+           ('$disname',
+           '$name',
+           '$ser'
+           )
+GO
+"
+
+
+
+
+$ServerInstance = "localhost"
+ $Database = "Test"
+ $ConnectionTimeout = 30
+
+$services=Get-Service
+foreach($service in $services)
+{
+$ser=$service.Status
+$name=$service.name
+$disname=$service.DisplayName
+
+$insertquery="
+INSERT INTO [dbo].[ServiceStatus]
+           ([ServiceDisplayName]
+           ,[ServiceName]
+           ,[Status])
+     VALUES
+           ('$disname',
+           '$name',
+           '$ser'
+           )
+
+"
+
+$conn = new-object System.Data.SqlClient.SQLConnection
+$ConnectionString = "Server={0};Database={1};Integrated Security=True;Connect Timeout={2}" -f $ServerInstance, $Database, $ConnectionTimeout
+
+ $conn.ConnectionString = $ConnectionString
+ $conn.Open()
+ $cmd = New-Object system.Data.SqlClient.SqlCommand($insertquery, $conn)
+$ds = New-Object System.Data.DataSet
+ $da = New-Object System.Data.SqlClient.SqlDataAdapter($cmd)
+ [void]$da.Fill($ds)
+$conn.Close()
+ $ds.Tables[0]
+}
+•	Using SqlBulkCopy: 
+Get-Service | Select   Name, Status,DisplayName ,StartType | Export-Csv -path "C:\Temp\All_Services.csv" -NoTypeInformation
+
+$serverName = "localhost"
+$databaseName = "Test"
+$tableName = "ServiceStatus"
+$csvFilePath = "C:\Temp\All_Services.csv"
+$connectionString = "Server=$serverName;Database=$databaseName;Integrated Security=True;"
+$csv = Import-Csv $csvFilePath
+$table = New-Object System.Data.DataTable
+$table.Columns
+$table.Columns.Add("Name")
+$table.Columns.Add("Status")
+$table.Columns.Add("DisplayName")
+$table.Columns.Add("StartType")
+ $table.Columns
+
+foreach ($row in $csv) {
+    $dataRow = $table.NewRow()
+    $dataRow.Name = $row.Name
+    $dataRow.Status = $row.Status
+    $dataRow.DisplayName = $row.DisplayName
+    $dataRow.StartType = $row.StartType
+    $table.Rows.Add($dataRow)
+     
+}
+
+
+$bulkCopy = New-Object Data.SqlClient.SqlBulkCopy($connectionString)
+$bulkCopy.DestinationTableName = $tableName
+$bulkCopy.WriteToServer($table)
+
+•	Import PowerShell JSON output file into SQL Server table
+# Set variables
+$serverName = "localhost"
+$databaseName = "Test"
+$tableName = "ServiceStatus"
+$jsonFilePath = "C:\temp\ServiceStatus.json"
+
+# Get service status data as JSON
+$serviceStatus = Get-Service | Select   Name, Status,DisplayName ,StartType | ConvertTo-Json 
+
+# Write JSON to file
+$serviceStatus | Out-File $jsonFilePath
+
+# Read JSON from file
+$jsonData = Get-Content $jsonFilePath | ConvertFrom-Json
+
+# Create connection to SQL Server database
+$connectionString = "Server=$serverName;Database=$databaseName;Integrated Security=True;"
+$connection = New-Object System.Data.SqlClient.SqlConnection($connectionString)
+
+# Open connection
+$connection.Open()
+
+# Create SQL insert command 
+$insertCommand = "INSERT INTO $tableName (Name, Status,DisplayName,StartType) VALUES (@Name, @Status,@DisplayName,@StartType)"
+$command = New-Object System.Data.SqlClient.SqlCommand($insertCommand, $connection)
+
+# Add parameters to SQL command
+$command.Parameters.Add("@Name", [System.Data.SqlDbType]::NVarChar, 50)
+$command.Parameters.Add("@Status", [System.Data.SqlDbType]::NVarChar, 50)
+$command.Parameters.Add("@DisplayName", [System.Data.SqlDbType]::NVarChar, 200)
+$command.Parameters.Add("@StartType", [System.Data.SqlDbType]::NVarChar, 50)
+
+# Loop through JSON data and execute SQL insert command for each row
+$jsonData | ForEach-Object {
+    $command.Parameters["@Name"].Value = $_.Name
+    $command.Parameters["@Status"].Value = $_.Status
+        $command.Parameters["@DisplayName"].Value = $_.DisplayName
+            $command.Parameters["@StartType"].Value = $_.StartType
+    $command.ExecuteNonQuery()
+}
+
+# Close connection
+$connection.Close()
+
+
+
+
+Install-Module PostgreSQLcmdlets
+
+
+$postgresql = Connect-PostgreSQL  -User "test" -Password "test@123" -Database "DemoDB" -Server "localhost" -Port 5432
+$phonebook = Select-PostgreSQL -Connection $postgresql -Table "phonebook" 
+$phonebook
+
+
+Add-PostgreSQL -Connection $PostgreSQL -Table phonebook -Columns @("phone", "firstname","lastname","address") -Values @("+91 9999666545", "Raj",
+"G","India")
+
+Remove-PostgreSQL -Connection $PostgreSQL -Table "phonebook" 
+
+
+Install-Module -Name Az.Sql -AllowClobber -Scope CurrentUser
+
+
+1.	New-AzSqlDatabase -ResourceGroupName "MyResourceGroup" -ServerName "MySqlServer" -DatabaseName "MyDatabase" -Edition "Standard" -ComputeModel "Provisioned
+
+
+$resourceGroupName = "MyResourceGroup"
+$serverName = "MySqlServer"
+$databaseName = "MyDatabase"
+
+$database = Get-AzSqlDatabase -ResourceGroupName $resourceGroupName -ServerName $serverName -DatabaseName $databaseName
+$database | Select-Object Name, Edition, Status, CreationDate, Collation
+
+

@@ -1,0 +1,270 @@
+Get-Process notepad | Stop-Process
+
+
+Get-ChildItem | Where-Object { $_.Extension -eq ".txt" } | Select-Object Name, Length
+
+Get-Process | Where-Object { $_.WorkingSet -gt 1MB } | ForEach-Object { Write-Output "$($_.Name) is using $($_.WorkingSet / 1MB) MB of memory." }
+
+Get-Help Start-Service -Parameter * 
+
+Get-Process | Get-Member 
+
+Get-Process | Select-Object -Property ProcessName, WorkingSet
+
+Get-ChildItem | Select-Object -Property Name
+
+Get-ChildItem | Select-Object -Property Name, @{Name="LineCount";Expression={(Get-Content $_.FullName).Count}}
+
+Get-Service | Select-Object Name, Status
+
+Get-Service | Select-Object @{Name="ServiceNameUpper";Expression={$_.ServiceName.ToUpper()}}, Status
+
+Get-ChildItem | Select-Object FullName, Name, @{Name="Extension";Expression={$_.Extension}}
+
+
+1.	$data = @"
+2.	Name, Age, Gender
+3.	John, 25, Male
+4.	Jane, 30, Female
+5.	Bob, 40, Male
+6.	"@
+7.	
+8.	$csv = $data | ConvertFrom-Csv | Select-Object -property Name, Age, Gender -ExcludeProperty Gender
+9.	
+10.	$csv | ConvertTo-Csv -NoTypeInformation
+
+
+1.	# Declare the data in CSV format
+2.	$data = @"
+3.	Name, Age, Gender, Occupation
+4.	John, 25, Male, Engineer
+5.	Jane, 30, Female, Accountant
+6.	Bob, 40, Male, Doctor
+7.	"@
+8.	
+9.	# the use of -ExcludeProperty - The column Gender is excluded
+10.	$csv = $data | ConvertFrom-Csv | Select-Object -property Name, Age -ExcludeProperty Gender,Occ*
+11.	
+12.	# Display the output
+13.	$csv | ConvertTo-Csv -NoTypeInformation
+
+
+
+1.	$numbers = 1..10
+2.	
+3.	$numbers | Select-Object -First 3
+4.	
+5.	$numbers | Select-Object -Last 3
+6.	
+7.	$numbers | Select-Object -Skip 5
+8.	
+9.	$numbers | Select-Object -Unique 
+
+
+
+Get-Process | Select-Object -Property UserName -Unique
+
+Get-ChildItem -Path C:\Data -File | Select-Object -Property Extension -Unique
+
+
+$person = @{
+2.	    Name = "Rajendra"
+3.	    Age = 35
+4.	    Address = @{
+5.	        Street = "123 Main St"
+6.	        City = "Anytown"
+7.	        State = "CA"
+8.	        ZipCode = "12345"
+9.	    }
+10.	}
+11.	
+12.	# display the hierarchical structure
+13.	$person | Select-Object Name, Address
+14.	
+15.	# Expand the nested property
+16.	$person | Select-Object -ExpandProperty Address
+17.	
+18.	# Select only the Name and Address.City properties, expanding the Address property
+19.	$person | Select-Object name,@{Name="street"; Expression={$_.Address.Street}}
+
+$obj | Select-Object Name, @{Name="City"; Expression={$_.Address.City}}
+
+
+
+Get-Process | Where-Object { $_.CPU -gt 50 }
+
+
+Get-ChildItem | Select-Object -Filter { $_.Extension -eq '.txt' }
+
+
+$processes1 = Get-Process -ComputerName Computer1
+$processes2 = Get-Process -ComputerName Computer2
+Compare-Object $processes1 $processes2 -Property Name -IncludeEqual | Where-Object { $_.SideIndicator -eq '==' } | Select-Object -Property InputObject
+
+
+1.	$computer1 = "Server1"
+2.	$computer2 = "Server2"
+3.	
+4.	$hotfixes1 = Get-HotFix -ComputerName $computer1
+5.	$hotfixes2 = Get-HotFix -ComputerName $computer2
+6.	
+7.	$comparison = Compare-Object -ReferenceObject $hotfixes1 -DifferenceObject $hotfixes2 -Property HotFixID -PassThru | Sort-Object -Property HotFixID
+8.	
+9.	if ($comparison.Count -eq 0) {
+10.	    Write-Host "No differences found in hotfixes between $computer1 and $computer2"
+11.	} else {
+12.	    Write-Host "The following hotfixes are installed on $computer1 but not on $computer2:"
+13.	    $comparison | Where-Object { $_.SideIndicator -eq "=>" } | Select-Object -ExpandProperty HotFixID
+14.	
+15.	    Write-Host "The following hotfixes are installed on $computer2 but not on $computer1:"
+16.	    $comparison | Where-Object { $_.SideIndicator -eq "<=" } | Select-Object -ExpandProperty HotFixID
+17.	}
+
+
+
+Get-Process | Group-Object -Property CPU | Sort-Object -Property Count -Descending | Select-Object -First 10 
+
+
+$people = @(
+2.	    [PSCustomObject]@{ Name = "Prashant"; Age = 39; Gender = "Male" }
+3.	    [PSCustomObject]@{ Name = "Rajendra"; Age = 35; Gender = "Male" }
+4.	    [PSCustomObject]@{ Name = "John"; Age = 39; Gender = "Male" }
+5.	    [PSCustomObject]@{ Name = "Sue"; Age = 35; Gender = "Female" }
+6.	)
+7.	
+8.	#Group by Age
+9.	$people | Group-Object Age 
+10.	
+11.	#Group by Gender
+12.	$people | Group-Object Gender 
+13.	
+14.	#Groou by multiple columns Age and Gender
+15.	$people | Group-Object Age,Gender 
+
+
+Get-Process | Sort-Object -Property WorkingSet -Descending
+
+Get-Process | Sort-Object -Property Name, CPU -Descending
+
+function Get-Numbers {
+2.	    $oddNumbers = @(1, 3, 5, 7, 9)
+3.	    $evenNumbers = @(2, 4, 6, 8, 10)
+4.	    return $oddNumbers, $evenNumbers
+5.	}
+6.	
+7.	$odd, $even = Get-Numbers
+8.	Write-Output "Odd numbers: $odd"
+9.	Write-Output "Even numbers: $even"
+
+
+1.	function Get-Names {
+2.	    return @('Rajendra', 'Prashanth', 'Jayaram', 'Gupta')
+3.	}
+4.	# Function call output to Pipeline
+5.	Get-Names|%{ write-output "Length of $_ is " ,$_.length}
+
+
+function Get-NameLength {
+2.	    [CmdletBinding()]
+3.	    param(
+4.	        [Parameter(ValueFromPipeline=$true)]
+5.	        [string[]]$Name
+6.	    )
+7.	    process {
+8.	        foreach ($n in $Name) {
+9.	            Write-Output "$n has length $($n.Length)"
+10.	        }
+11.	    }
+12.	}
+13.	
+14.	# the ouptut is GetNames function is fed to Get-NameLength function using Pipeline
+15.	
+16.	Get-Names|Get-NameLength
+17.	
+18.	
+19.	'Mimansa', 'Arushi', 'surbhi' | Get-NameLength
+
+
+
+2.	function Multiply-ByTwo {
+3.	    [CmdletBinding()]
+4.	    param(
+5.	        [int[]]$Numbers
+6.	    )
+7.	
+8.	    process {
+9.	        foreach ($Number in $Numbers) {
+10.	            Write-Output ($Number * 2)
+11.	        }
+12.	    }
+13.	}
+14.	
+15.	#declare the input variable 
+16.	$Numbers = @(1, 2, 3, 4, 5)
+17.	
+18.	#Function call
+19.	
+20.	Multiply-ByTwo -Numbers $Numbers
+
+
+
+<#
+2.	
+3.	Name,IPAddress
+4.	Server1,10.0.1.10
+5.	Server2,192.168.1.20
+6.	Server3,10.0.2.30
+7.	Server4,10.0.3.40
+8.	Server5,192.168.2.50
+9.	
+10.	#>
+11.	
+12.	# Read the content of the CSV file using Get-Content
+13.	
+14.	Get-Content "C:\PowerShell\Chapter 3\servers.csv"
+15.	
+16.	# Filter the input data based on the condition 
+17.	
+18.	Import-Csv -Path "C:\PowerShell\Chapter 3\servers.csv" | Where-Object { $_.IPAddress.StartsWith("10") } | Select-Object Name
+
+
+1.	{
+2.	    "Authors": [
+3.	        {
+4.	            "name": "Prashanth",
+5.	            "age": 39,
+6.	            "email": "pjayaram@example.com",
+7.	            "address": {
+8.	                "street": "123 Main St",
+9.	                "city": "Anytown",
+10.	                "state": "CA",
+11.	                "zip": "12345"
+12.	            }
+13.	        },
+14.	        {
+15.	            "name": "Rajendra",
+16.	            "age": 35,
+17.	            "email": "rajendra@example.com",
+18.	            "address": {
+19.	                "street": "456 First St",
+20.	                "city": "Anycity",
+21.	                "state": "CA",
+22.	                "zip": "67890"
+23.	            }
+24.	        }
+25.	    ]
+26.	}
+
+
+
+Get-Content -Path "C:\PowerShell\Chapter 3\Authors.JSON"| ConvertFrom-Json | Select-Object -ExpandProperty Authors | Where-Object { $_.age -gt 35}
+
+
+
+
+
+
+
+
+
+

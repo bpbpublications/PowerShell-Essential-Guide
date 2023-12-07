@@ -1,0 +1,276 @@
+1.	class Person 
+2.	{
+3.	    [string] $Name
+4.	    [int] $Age
+5.	
+6.	    Person([string] $name, [int] $age) {
+7.	        $this.Name = $name
+8.	        $this.Age = $age
+9.	    }
+10.	
+11.	    [void] Display() {
+12.	        Write-Host "Hello, My name is $($this.Name) and $($this.Age) years old."
+13.	    }
+14.	}
+15.	
+16.	$person = New-Object Person -ArgumentList "Prashanth ", 39
+17.	
+18.	# Call properties of the Person class
+19.	
+20.	Write-Host("Name is "+$person.Name)
+21.	Write-Host("Age is "+ $person.Age)
+22.	
+23.	# Call Member function or method of the class person
+24.	
+25.	$person.Display()
+26.	
+27.	# To create a new instance of the Person class, you can use the New-Object cmdlet:
+28.	
+29.	$person = New-Object Person -ArgumentList "Prashanth ", 39
+30.	
+31.	# You can then access the object's properties and methods using the dot notation:
+32.	
+33.	$person.Name          # returns "Prashanth."
+34.	$person.Age           # returns 39
+35.	$person.SayHello()    # Hello, My name is Prashanth, and 39 years old
+
+
+
+1.	class Counter {
+2.	    static [int]$Count= 0
+3.	
+4.	    static [int]Increment() {
+5.	        $Count++
+6.	        return $Count
+7.	    }
+8.	}
+9.	
+10.	Counter::Count  # returns 0
+11.	Counter::Increment()  # returns 1
+12.	Counter::Increment()  # returns 2
+
+
+
+1.	class Person 
+2.	{
+3.	    [string] $Name
+4.	    [int] $Age
+5.	
+6.	    Person([string] $name, [int] $age) {
+7.	        $this.Name = $name
+8.	        $this.Age = $age
+9.	    }
+10.	
+11.	    [void] Display() {
+12.	        Write-Host "Hello, My name is $($this.Name) and $($this.Age) years old."
+13.	    }
+14.	}
+15.	
+16.	class Employee : Person
+17.	{
+
+18.	    [int]$sal
+19.	
+20.	    employee([string]$name, [int]$age, [int]$sal) : base($name, $age) {
+21.	        $this.sal = $sal
+22.	    }
+23.	
+24.	    [void] display()
+25.	    {
+26.	    Write-Host "Hello, My name is $($this.Name) and $($this.Age) years old and earns $($this.sal)"
+27.	    }
+28.	
+29.	}
+30.	
+31.	
+32.	$employee = New-Object employee -ArgumentList "Prashanth ", 39, 50000
+33.	
+34.	# Call Member function or method of the class person
+35.	
+36.	$employee.Display()
+
+
+
+Get-Command
+
+Get-Help Get-Process
+
+Get-Command -Noun Service
+
+Get-Command -Module ActiveDirectory
+
+Get-Help Get-Process
+
+Get-Help <cmdlet_name>
+
+Get-Help Get-Service
+
+
+
+
+Get-Help Get-Service -Full
+
+
+Set-ExecutionPolicy <Policy> [-Scope <Scope>] [-Force]
+
+Get-ExecutionPolicy [-List]
+
+Set-ExecutionPolicy RemoteSigned
+
+Set-ExecutionPolicy RemoteSigned -force
+
+Set-ExecutionPolicy RemoteSigned -scope currentuser
+
+
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Undefined
+
+Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Undefined
+
+Find-Module -Name az | Install-Module 
+
+Import-Module -Name Az
+
+
+Install-Module <ModuleName> -Scope <ScopeName>
+
+Install-Module az -Scope AllUsers
+
+cd HKLM:\System\CurrentControlSet\Services\Spooler
+Get-Item . 
+
+
+$PROFILE | Get-Member -Type NoteProperty | Select Name, Definition
+
+if (!(Test-Path -Path $PROFILE)) {
+  New-Item -ItemType File -Path $PROFILE -Force
+} 
+
+
+
+function Color-Console {
+  $Host.ui.rawui.backgroundcolor = "white"
+  $Host.ui.rawui.foregroundcolor = "black"
+  $hosttime = (Get-ChildItem -Path $PSHOME\pwsh.exe).CreationTime
+  $hostversion="$($Host.Version.Major)`.$($Host.Version.Minor)"
+  $Host.UI.RawUI.WindowTitle = "PowerShell Learning $hostversion ($hosttime)"
+  Clear-Host
+}
+Color-Console
+
+
+# Set Default location
+Set-Location C:\PowerShellModules\WorkingDirectory
+
+
+Set-Variable -Name MyVariable -Value "MyValue"
+
+New-Alias -Name ls -Value Get-ChildItem
+
+Set-Alias tn Test-NetConnection
+
+$VariableName = Value
+
+$myName = "John Doe"
+
+$myNumber = 42 + 3
+
+Example: $stringVariable = "This is a string variable"
+
+Example: [int]$integerVariable = 42
+
+Example: [bool]$boolVariable = $true	
+
+
+Example: $arrayVariable = @(1, 2, 3, 4, 5)
+
+Example: $hashTableVariable = @{
+    Key1 = "Value1"
+    Key2 = "Value2"
+}
+
+
+Write-Host "PowerShell version: $($PSVersionTable.PSVersion)" 
+
+
+1.	Get-ChildItem -Path “C:\Logs” | Where-Object { $_.LastWriteTime -gt (Get-Date).AddDays(-7) }
+
+1.	Get-ChildItem C:\Windows\System32\drivers\etc\hosts | Select-Object -First 1
+2.	if ($?) {
+3.	    Write-Host “Command succeeded”
+4.	} else {
+5.	    Write-Host “Command failed”
+6.	}
+
+
+1.	Get-ChildItem C:\Windows\System32\drivers\etc\hosts | Select-Object -First 1
+2.	if ($?) {
+3.	    Write-Host “Command succeeded”
+4.	} else {
+5.	    Write-Host “Command failed”
+6.	}
+
+
+1.	$a = $null          # Sets the variable $a to null
+2.	$b = “”             # Sets the variable $b to an empty string
+3.	$c = 0              # Sets the variable $c to zero
+4.	
+5.	if ($a -eq $null) {
+6.	    Write-Host “Variable a is null”
+7.	}
+8.	
+9.	if ($b -eq $null) {
+10.	    Write-Host “Variable b is null”
+11.	}
+12.	
+13.	if ($c -eq $null) {
+14.	    Write-Host “Variable c is null”
+15.	} else {
+16.	    Write-Host “Variable c is not null”
+17.	}
+
+
+1.	$a = 10
+2.	$b = 5
+3.	
+4.	if ($a -gt $b) {
+5.	    Write-Host “a is greater than b”
+6.	}
+7.	
+8.	if ($a -lt $b) {
+9.	    Write-Host “a is less than b”
+10.	} else {
+11.	    Write-Host “a is not less than b”
+12.	}
+13.	
+14.	$c = $a -eq $b
+15.	if ($c) {
+16.	    Write-Host “a is equal to b”
+17.	} else {
+18.	    Write-Host “a is not equal to b”
+
+
+
+1.	function My-Function {
+2.	    param(
+3.	        [string]$Name,
+4.	        [int]$Age
+5.	    )
+6.	
+7.	    Write-Host “Name: $Name”
+8.	    Write-Host “Age: $Age”
+9.	
+10.	    Write-Host “Additional arguments:”
+11.	    foreach ($arg in $args) {
+12.	        Write-Host $arg
+13.	    }
+14.	}
+15.	My-Function -Name “John” -Age 30 “Additional argument 1” “Additional argument 2”
+
+
+
+Get-WmiObject -Class Win32_OperatingSystem.
+
+
+Get-CimInstance -ClassName Win32_NetworkAdapter
+
+Invoke-CimMethod -Query 'select * from Win32_Process where name like "notepad%"' -MethodName "Terminate

@@ -1,0 +1,373 @@
+﻿#Using if-else conditions clausee
+$num = 5
+
+if ($num -gt 0) {
+    Write-Host "$num is positive"
+}
+else {
+    Write-Host "$num is negative"
+}
+
+#Using Switch-Case
+$num = 2
+
+switch ($num) {
+    1 { Write-Host "One" }
+    2 { Write-Host "Two" }
+    3 { Write-Host "Three" }
+    default { Write-Host "Not a valid number" }
+}
+
+#Learn to use delays in PowerShell
+Write-Host "Starting script"
+Start-Sleep -Seconds 5
+Write-Host "Continuing script"
+
+#ForEach loop
+# Example array of fruits
+$fruits = "apple", "banana", "cherry", "date"
+
+# Loop through each fruit and print it to the console
+foreach ($fruit in $fruits) {
+    Write-Host "Fruit: $fruit"
+}
+
+#Sequential mode
+
+$time1 = Measure-Command {
+    1..10 | ForEach-Object {
+        $_ * 1000  
+        Sleep 1
+    }
+}
+    Write-Output "“Sequential Time : Minutes : $($time1.Minutes) , Seconds : $($time1.Seconds) , Milliseconds : $($time1.TotalMilliseconds) "“
+
+#Parallel Mode:
+
+$time1 = Measure-Command {
+    1..10 | ForEach-Object -Parallel{
+        $_ * 1000  
+        Sleep 1
+    }
+
+}
+    
+Write-Output "“Parallel Time : Minutes : $($time1.Minutes) , Seconds : $($time1.Seconds) , Milliseconds : $($time1.TotalMilliseconds) "“
+
+
+#While loop 
+
+# Example of a while loop that counts down from 10 to 1
+$i = 10
+
+while ($i -gt 0) {
+    Write-Host "“Number :$i"”
+    $i--—
+}
+
+#Do..while loop 
+
+$i = 1
+do {
+    Write-Host "“Count: $i"”
+    $i++
+} while ($i -le 10)
+
+#For Loop
+
+# Example of a for loop that counts from 1 to 5
+for ($i = 1; $i -le 5; $i++) {
+    Write-Host $i
+}
+
+#Do Until Loop
+
+cls
+$index = 0
+$counter = 0
+
+Do {
+
+     "My Value : $index"
+
+      $counter++
+	
+	      $index++
+	
+	
+	} Until ($index -eq 10)
+
+#Array
+
+# Create an array using the @() notation
+$array = @(1, 2, 3)
+
+# Create an array using the New-Object cmdlet
+$array = New-Object System.Collections.ArrayList
+$array.Add(1)
+$array.Add(2)
+$array.Add(3)
+
+
+# Access the first element of the array
+$firstElement = $array[0]
+
+#Sorting elements in an array
+
+$test=@(‘Hi’,’Apple’,'Samsung')
+$test |sort
+
+
+#Descending order
+
+$test=@(1,10,40)
+$test |sort -Descending
+
+#Update an element in an array
+
+$test=@(1,10,40)
+$test[0]=55
+$test
+
+
+#Find an element in an array
+
+$test=@(‘Apple','Banana','Orange','Kiwi', 'Apricot')
+$test -like "*Ap*"
+
+#Looping an array
+
+$test=@(1,4,5,6)
+foreach($i in $test)
+{
+$i=$i * 2
+Write-Host $i
+}
+
+#Concatenation Operator
+# Define two arrays
+$array1 = @(1, 2, 3)
+$array2 = @(4, 5, 6)
+
+# Concatenate the arrays
+$newArray = $array1 + $array2
+
+# Print the concatenated array
+Write-Host $newArray
+
+#COmparison Operator
+
+# Define two arrays
+$array1 = @(1, 2, 3)
+$array2 = @(4, 5, 6)
+
+# Compare the length of the arrays
+if ($array1.Length -eq $array2.Length) {
+    Write-Host "The arrays have the same length."
+} else {
+    Write-Host "The arrays have different lengths."
+	}
+	
+	# Compare the first element of the arrays
+	if ($array1[0] -lt $array2[0]) {
+	    Write-Host "The first element of array1 is less than the first element of array2."
+	} else {
+	    Write-Host "The first element of array1 is greater than or equal to the first element of array2."
+	}
+
+#Arithmetic operator
+
+$data = @('red','green','blue')
+$data * 3
+
+#Logical operator
+
+# Define two arrays
+$array1 = @(1, 2, 3)
+$array2 = @(3, 2, 1)
+
+# Greater than operator
+$result = $array1.Length -gt $array2.Length
+Write-Host "Greater than result: $result"
+
+# Less than operator
+$result = $array1.Length -lt $array2.Length
+Write-Host "Less than result: $result"
+
+# Equal to operator
+$result = $array1 -eq $array2
+Write-Host "Equal to result: $result"
+
+# Not equal to operator
+$result = $array1 -ne $array2
+Write-Host "Not equal to result: $result"
+
+# Logical AND operator
+$result = ($array1 -gt 1) -and ($array2 -gt 1)
+Write-Host "Logical AND result: $result"
+
+# Logical OR operator
+$result = ($array1 -gt 2) -or ($array2 -gt 2)
+Write-Host "Logical OR result: $result"
+
+#•	Adding or removing an element in an array
+cls
+$array = @(1, 2, 3)
+$array += "Hello"
+$array
+
+#System.Collections.ArrayList
+[System.Collections.ArrayList]$arrays = @(1,2,3)
+$arrays.Add(50)
+
+
+#Remove an element
+
+[System.Collections.ArrayList]$arrays = @(1,2,3)
+$arrays.Remove(2)
+$arrays
+
+
+#hash Tables
+
+$My_states = @{
+   "AK" = "Alaska"
+   "CO" = "Colorado"
+  "IL" = "Illinois"
+  "NC" = "North Carolina"
+  "TX" = "Texas"
+}
+$My_states
+
+
+#add items to hash table
+
+$My_states = @{
+   "AK" = "Alaska"
+   "CO" = "Colorado"
+  "IL" = "Illinois"
+  "NC" = "North Carolina"
+  "TX" = "Texas"
+}
+
+$My_states.add("NH","New Hampshire")
+	$My_states
+
+Edit items in a Hash Table: 
+
+$My_states.Set_Item("TX", "Texas state")
+$My_states
+
+#Remove an Item from Hash table
+
+$My_states.Remove("TX")
+$My_states
+
+#Ordered Dictonary
+
+$employee = [ordered]@{
+    name = 'Rajendra'
+    age  = 36
+}
+
+
+#GetEnumerator() method:
+$hashTable = @{
+    "Name" = "John"
+    "Age" = 30
+    "City" = "New York"
+}
+$enumerator = $hashTable.GetEnumerator()
+while ($enumerator.MoveNext()) {
+   Write-Host "Key: $($enumerator.Current.Key),
+ 	Value: $($enumerator.Current.Value)"
+	}
+
+#•	Search an item in the hash table
+
+$hashTable = @{
+    "Name" = "John"
+    "Age" = 30
+    "City" = "New York"
+}
+
+foreach ($item in $hashTable.GetEnumerator()) {
+    if ($item.Key -eq "Name" -and $item.Value -eq "John") {
+        Write-Host "The hash table contains an item with key 'Name' 
+	      and value 'John'"
+	    }
+	}
+
+#hash table with three key-value pairs
+
+cls
+$hashTable = @{
+    "Name" = "John"
+    "Age" = 30
+    "City" = "New York"
+}
+
+If($hashtable.ContainsKey('Name'))
+{
+	   Write-Host "True, Key exists in the hash table"
+	    }
+	 Else
+	 {
+	 write-host "Key does not exists"
+	 }
+
+
+#•	Using @ as a SPLAT operator for hash table PowerShell
+
+$newUser = @{
+    Name = "Rajendra Gupta"
+    GivenName = "Rajendra"
+    Surname = "Gupta"
+    SamAccountName = "rgupta"
+    UserPrincipalName = "rgupta@example.com"
+    Path = "OU=Users,OU=Sales,DC=example,DC=com"
+    AccountPassword = (ConvertTo-SecureString "P@ssw0rd" -AsPlainText -Force)
+    Enabled = $true
+	}
+	
+	New-ADUser @newUser
+
+#•	Store an Array inside a Hash table
+$myHash = @{
+    Name = "John"
+    Age = 35
+    Hobbies = @("Reading", "Swimming", "Traveling")
+}
+
+$myHash["Hobbies"][0]  # "Reading"
+$myHash["Hobbies"][1]  # "Swimming"
+$myHash["Hobbies"][2]  # "Traveling"
+
+#•	Adding two hashtables: 
+
+$hash1 = [ordered]@{
+    Name = "Rajendra Gupta"
+    Age = 35
+}
+
+$hash2 = [ordered]@{
+    City = "New York"
+    State = "NY"
+}
+	
+	$hash3 = $hash1 + $hash2
+	$hash3
+
+#•	Creating objects using pscustomobject from the Hash table
+
+$person = @{
+    Name = "John Smith"
+    Age = 35
+    City = "New York"
+}
+
+#object $obj using dot notation
+$obj = [PSCustomObject]$person
+$obj.Name   # "John Smith"
+$obj.Age    # 35
+$obj.City   # "New York

@@ -1,0 +1,44 @@
+sudo dpkg -i powershell-lts_7.3.2-1.deb_amd64.deb
+
+
+Get-Module -ListAvailable
+
+Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'
+
+1.	# Install the OpenSSH Client
+2.	Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
+3.	
+4.	# Install the OpenSSH Server
+5.	Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+
+
+
+1.	Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $env:Path
+
+
+Start-service sshd  
+
+
+sudo apt install openssh-client
+sudo apt install openssh-server  
+
+
+Subsystem powershell /usr/bin/pwsh -sshs -nologo
+
+
+Enter-PSSession -HostName 192.168.56.101 -UserName prashant -Port 22 -SSHTransport
+
+
+uname -r
+
+$session = New-PSSession - ComputerName PowerShell -Credential PowerShell\administrator
+$session
+
+Enter-PSSession -Session $session
+
+
+Get-Service | Where-Object {$_.Status -EQ "Running" } |Format-Table -AutoSize.
+
+Invoke-Command -Session $session -ScriptBlock {Get-Service | Where-Object {$_.Status -EQ "Running" } |Format-Table -AutoSize}
+
+

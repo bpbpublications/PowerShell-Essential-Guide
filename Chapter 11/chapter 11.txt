@@ -1,0 +1,139 @@
+﻿# Data points
+$data = 1, 2, 3, 4, 5
+
+# Calculate the mean
+$mean = ($data | Measure-Object -Average).Average
+
+# Calculate the squared difference
+$squaredDifferences = $data | ForEach-Object { ($_ - $mean) * ($_ - $mean) }
+
+# Calculate the sum of squared differences
+$sumSquaredDifferences = $squaredDifferences | Measure-Object -Sum | Select-Object -ExpandProperty Sum
+
+# Calculate the variance
+$variance = $sumSquaredDifferences / $data.Count
+
+# Calculate the standard deviation
+$standardDeviation = [Math]::Sqrt($variance)
+
+# Output the results
+Write-Host "Variance: $variance"
+Write-Host "Standard Deviation: $standardDeviation"
+
+
+
+
+# Sample data with duplicates
+$data = 1, 2, 3, 2, 4, 3, 5, 1
+
+# Remove duplicates
+$uniqueData = $data | Select-Object -Unique
+
+# Perform aggregation (example: sum)
+$sum = $uniqueData | Measure-Object -Sum | Select-Object -ExpandProperty Sum
+
+# Output the results
+Write-Host "Unique data: $uniqueData"
+Write-Host "Sum: $sum"
+
+workflow foreachptest {
+
+   param([string[]]$computers)
+
+   foreach –parallel ($computer in $computers){
+
+    Get-WmiObject –Class Win32_OperatingSystem –PSComputerName $computer
+
+   }
+
+} 
+
+foreachptest  -Computers 'localhost'
+
+# Example : Data visualization
+
+# Add the required assemblies
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Windows.Forms.DataVisualization
+
+# Create a new chart object
+$chart = New-Object System.Windows.Forms.DataVisualization.Charting.Chart
+
+# Add a chart area to the chart
+$chartArea = New-Object System.Windows.Forms.DataVisualization.Charting.ChartArea
+$chartArea.AxisX.Title = "X Values"
+$chartArea.AxisY.Title = "Y Values"
+$chartArea.AxisX.Minimum = 0
+$chartArea.AxisX.Maximum = 5
+$chartArea.AxisY.Minimum = 0
+$chartArea.AxisY.Maximum = 10
+$chart.ChartAreas.Add($chartArea)
+
+# Add a series to the chart
+$series = New-Object System.Windows.Forms.DataVisualization.Charting.Series
+$series.Name = "My Series"
+$series.ChartType = [System.Windows.Forms.DataVisualization.Charting.SeriesChartType]::Line
+$series.Points.AddXY(1, 2)
+$series.Points.AddXY(2, 4)
+$series.Points.AddXY(3, 6)
+$series.Points.AddXY(4, 8)
+$series.Points.AddXY(5, 10)
+$chart.Series.Add($series)
+
+# Display the chart
+$chart.Dock = [System.Windows.Forms.DockStyle]::Fill
+$form = New-Object System.Windows.Forms.Form
+$form.Text = "My Chart"
+$form.Controls.Add($chart)
+$form.ShowDialog() | Out-Null
+
+
+#Example 2: Data Extraction using .Net class libares
+
+# Import SQL Server module
+Import-Module SQLServer
+
+# Connect to SQL Server
+$connectionString = "Server=MyServer;Database=MyDatabase;Integrated Security=True;"
+$sqlConnection = New-Object System.Data.SqlClient.SqlConnection($connectionString)
+$sqlConnection.Open()
+
+# Execute SQL query
+$sqlQuery = "SELECT * FROM MyTable"
+$sqlCommand = New-Object System.Data.SqlClient.SqlCommand($sqlQuery, $sqlConnection)
+$sqlReader = $sqlCommand.ExecuteReader()
+
+# Export data to CSV file
+$csvFile = "C:\MyData.csv"
+$dt = New-Object System.Data.DataTable
+$dt.Load($sqlReader)
+$dt | Export-Csv -Path $csvFile -NoTypeInformation
+
+# Close SQL Server connection
+$sqlConnection.Close()
+
+
+# Example 3: Using Python to import the data
+
+
+import pandas as pd
+
+# Read data from CSV file
+csv_file = "C:/MyData.csv"
+df = pd.read_csv(csv_file)
+
+# Analyze data
+
+Data Cleaning:
+# Remove duplicates from CSV file
+$csvFile = "C:\MyData.csv"
+$df = Import-Csv -Path $csvFile
+$df = $df | Sort-Object -Property Column1, Column2, Column3 -Unique
+$df | Export-Csv -Path $csvFile -NoTypeInformation
+
+# Convert all text to lowercase
+(Get-Content $csvFile) | ForEach-Object {$_ -replace $_, $_.ToLower()} | Set-Content $csvFile
+
+
+# Example 4: 
+
